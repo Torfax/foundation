@@ -1,4 +1,3 @@
-// src/core/config/ConfigService.ts
 import dotenv from "dotenv";
 import BaseEnv from "./types/BaseEnv";
 
@@ -26,7 +25,7 @@ export class ConfigService<T extends Record<string, any> = BaseEnv> {
 
     if (value === undefined || value === null || value === "") {
       if (defaultValue !== undefined) return defaultValue;
-      throw new Error(`❌ Config Error: missing environment variable "${String(key)}"`);
+      throw new Error(`Config Error: missing environment variable "${String(key)}"`);
     }
 
     return this.autoConvert(value);
@@ -46,7 +45,7 @@ export class ConfigService<T extends Record<string, any> = BaseEnv> {
 
     // JSON
     if ((value.startsWith("{") && value.endsWith("}")) ||
-        (value.startsWith("[") && value.endsWith("]"))) {
+      (value.startsWith("[") && value.endsWith("]"))) {
       try {
         return JSON.parse(value);
       } catch {
