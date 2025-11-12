@@ -3,4 +3,5 @@ export default interface UploadOptions {
   filePrefix?: string;
   maxFileSize?: number;
   allowedMimeTypes?: string[];
+  baseUploadsDir?: string;
 }

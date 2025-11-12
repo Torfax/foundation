@@ -1,5 +1,4 @@
-// src/core/files/types/ProcessedFile.ts
-export type ProcessedFile = Express.Multer.File & {
+export interface ProcessedFile extends Express.Multer.File {
+  storedPath: string;
   relativePath: string;
-  publicUrl: string;
-};
+}
