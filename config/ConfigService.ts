@@ -20,16 +20,20 @@ export class ConfigService<T extends Record<string, any> = BaseEnv> {
   get(key: string, defaultValue?: any): any;
 
   // --- Implementación real (una sola)
-  get(key: string, defaultValue?: any): any {
+  get(key: string, ...maybeDefault: any[]): any {
+    const hasDefault = maybeDefault.length > 0;
+    const defaultValue = hasDefault ? maybeDefault[0] : undefined;
+
     const value = this.env[key];
 
     if (value === undefined || value === null || value === "") {
-      if (defaultValue !== undefined) return defaultValue;
+      if (hasDefault) return defaultValue;
       throw new Error(`Config Error: missing environment variable "${String(key)}"`);
     }
 
     return this.autoConvert(value);
   }
+
 
   /**
    * Convierte automáticamente valores string a boolean, number o JSON.
