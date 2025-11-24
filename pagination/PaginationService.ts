@@ -1,10 +1,10 @@
 // src/core/pagination/services/pagination.service.ts
 import { Repository, FindManyOptions, ObjectLiteral, SelectQueryBuilder } from 'typeorm';
-import { 
-    PaginatedResult, 
-    PaginationMeta, 
+import {
+    PaginatedResult,
+    PaginationMeta,
     PaginationOptions,
-    PaginationConfig 
+    PaginationConfig
 } from './PaginationTypes';
 
 export class PaginationService {
@@ -27,7 +27,8 @@ export class PaginationService {
     async paginate<T extends ObjectLiteral>(
         repository: Repository<T>,
         options: PaginationOptions,
-        findOptions: FindManyOptions<T> = {}
+        findOptions: FindManyOptions<T> = {},
+        countOnly: boolean = false
     ): Promise<PaginatedResult<T>> {
         const validatedOptions = this.validateAndNormalizeOptions(options);
         const { page, limit, sortBy, sortOrder } = validatedOptions;
@@ -36,8 +37,8 @@ export class PaginationService {
         // Aplicar ordenamiento seguro
         if (sortBy) {
             findOptions.order = this.buildSafeOrder(
-                findOptions.order, 
-                sortBy, 
+                findOptions.order,
+                sortBy,
                 sortOrder
             );
         }
@@ -46,7 +47,17 @@ export class PaginationService {
         findOptions.take = limit;
 
         try {
-            const [data, totalItems] = await repository.findAndCount(findOptions);
+            let totalItems: number;
+            let data: T[] | null = null;
+
+            if (countOnly) {
+                totalItems = await repository.count(findOptions);
+            } else {
+                const [a, b] = await repository.findAndCount(findOptions);
+                data = a;
+                totalItems = b;
+            }
+
             const meta = this.calculatePaginationMeta(page, limit, totalItems);
 
             return { data, pagination: meta };
@@ -128,11 +139,11 @@ export class PaginationService {
     validateAndNormalizeOptions(options: PaginationOptions): Required<PaginationOptions> {
         const page = Math.max(1, options.page || 1);
         const limit = Math.min(this.config.maxLimit, Math.max(1, options.limit || this.config.defaultLimit));
-        const sortBy = options.sortBy && this.isValidFieldName(options.sortBy) 
-            ? options.sortBy 
+        const sortBy = options.sortBy && this.isValidFieldName(options.sortBy)
+            ? options.sortBy
             : this.config.defaultSort;
-        const sortOrder = options.sortOrder && ['ASC', 'DESC'].includes(options.sortOrder) 
-            ? options.sortOrder 
+        const sortOrder = options.sortOrder && ['ASC', 'DESC'].includes(options.sortOrder)
+            ? options.sortOrder
             : this.config.defaultOrder;
 
         return { page, limit, sortBy, sortOrder };
@@ -144,23 +155,23 @@ export class PaginationService {
     validatePaginationParams(query: any): Required<PaginationOptions> {
         const page = Math.max(1, parseInt(query.page) || 1);
         const limit = Math.min(
-            this.config.maxLimit, 
+            this.config.maxLimit,
             Math.max(1, parseInt(query.limit) || this.config.defaultLimit)
         );
-        
-        const sortBy = query.sortBy && this.isValidFieldName(query.sortBy) 
-            ? query.sortBy 
+
+        const sortBy = query.sortBy && this.isValidFieldName(query.sortBy)
+            ? query.sortBy
             : this.config.defaultSort;
-            
+
         const rawSortOrder = query.sortOrder || this.config.defaultOrder;
-        const sortOrder = ['ASC', 'DESC'].includes(rawSortOrder?.toUpperCase()) 
+        const sortOrder = ['ASC', 'DESC'].includes(rawSortOrder?.toUpperCase())
             ? rawSortOrder.toUpperCase() as "ASC" | "DESC"
             : this.config.defaultOrder;
 
-        return { 
-            page, 
-            limit, 
-            sortBy, 
+        return {
+            page,
+            limit,
+            sortBy,
             sortOrder
         };
     }
