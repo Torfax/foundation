@@ -36,6 +36,7 @@ export interface QueryRequest {
   filters?: QueryFilter[];         // 0..n filtros dinámicos
   sort?: QuerySort | null;         // opcional
   pagination?: QueryPagination;    // opcional (si no, backend define defaults)
+  metadata?: boolean;
 }
 
 

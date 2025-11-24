@@ -1,4 +1,4 @@
-import { IsOptional, IsNumber, Min } from 'class-validator';
+import { IsOptional, IsNumber, Min, IsBoolean } from 'class-validator';
 import { Type, Transform } from 'class-transformer';
 
 export class QueryRequestDto {
@@ -13,6 +13,15 @@ export class QueryRequestDto {
   @Min(1)
   @Type(() => Number)
   limit?: number = 10;
+
+  @IsOptional()
+  @Transform(({ value }) => {
+    if (value === "true" || value === true) return true;
+    if (value === "false" || value === false) return false;
+    return undefined;
+  })
+  @IsBoolean()
+  metadata?: boolean;
 
   @IsOptional()
   @Transform(({ value }) => {
