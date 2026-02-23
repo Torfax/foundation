@@ -1,10 +1,4 @@
-// src/core/pagination/services/PaginationTypes.ts
-export interface PaginationOptions {
-    page?: number;
-    limit?: number;
-    sortBy?: string;
-    sortOrder?: "ASC" | "DESC";
-}
+
 
 export interface PaginationMeta {
     currentPage: number;
@@ -20,7 +14,7 @@ export interface PaginatedResult<T> {
     pagination: PaginationMeta;
 }
 
-export interface PaginationConfig {
+export interface ListConfig {
     maxLimit?: number;
     defaultLimit?: number;
     defaultSort?: string;

@@ -1,7 +1,15 @@
 import { IsOptional, IsNumber, Min, IsBoolean } from 'class-validator';
 import { Type, Transform } from 'class-transformer';
+import { CriteriaFilterOperator } from '../criteria/CriteriaFilterOperator';
 
-export class QueryRequestDto {
+
+export interface QueryFilterDto<F extends string = string> {
+  field: F;
+  op: CriteriaFilterOperator;
+  value?: any;
+}
+
+export class ListQueryDto  {
   @IsOptional()
   @IsNumber()
   @Min(1)
@@ -31,7 +39,7 @@ export class QueryRequestDto {
       return [];
     }
   })
-  filters?: any[] = [];
+  filters?: QueryFilterDto[];
 
   @IsOptional()
   @Transform(({ value }) => {
