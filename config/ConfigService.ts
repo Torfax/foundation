@@ -65,5 +65,5 @@ export class ConfigService<T extends Record<string, any> = BaseEnv> {
   }
 }
 
-const configService = new ConfigService<BaseEnv>();
-export default configService;
+/* const configService = new ConfigService<BaseEnv>();
+export default configService; */
