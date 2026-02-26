@@ -1,14 +1,14 @@
-import { AppDataSource } from "@src/database/DataSource";
 import { DatabaseDriverName } from "./DatabaseDriverName";
 import { DriverRegistry } from "./DriverRegistry";
 import { TypeOrmDriver } from "./typeorm/TypeOrmDriver";
+import { DataSource } from "typeorm";
 
 export class DatabaseAdaptersBootstrap {
 
-    static run() {
+    static run(dataSource : DataSource) {
         DriverRegistry.register(
             DatabaseDriverName.TYPEORM,
-            new TypeOrmDriver(AppDataSource) //TODO: Esto tambien deberia de enviarse por parametro..
+            new TypeOrmDriver(dataSource)
         );
     }
 
