@@ -47,25 +47,6 @@ export function isTimeInRange(
   return timeMinutes >= startMinutes && timeMinutes <= endMinutes;
 }
 
-/**
- * Compara si un rango de fechas está dentro de un rango horario permitido
- */
-export function isDateTimeRangeInSchedule(
-  start: Date,
-  end: Date,
-  allowedStart: string,
-  allowedEnd: string
-): boolean {
-  const startMinutes = dateToMinutes(start);
-  const endMinutes = dateToMinutes(end);
-  const allowedStartMinutes = parseTimeToMinutes(allowedStart);
-  const allowedEndMinutes = parseTimeToMinutes(allowedEnd);
-
-  return (
-    startMinutes >= allowedStartMinutes &&
-    endMinutes <= allowedEndMinutes
-  );
-}
 
 /**
  * Obtiene todos los días de la semana como array
