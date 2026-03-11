@@ -17,4 +17,9 @@ export default interface BaseEnv {
 
   /** Optional full connection string */
   DATABASE_URL?: string;
+
+
+  ENABLED_SWAGGER? : boolean;
+
+  JWT_SECRET : string;
 }
