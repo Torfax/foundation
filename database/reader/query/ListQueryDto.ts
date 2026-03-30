@@ -41,6 +41,17 @@ export class ListQueryDto  {
   })
   filters?: QueryFilterDto[];
 
+  /** Logical AND/OR tree (JSON). Prefer over flat `filters` when both are sent. */
+  @IsOptional()
+  @Transform(({ value }) => {
+    try {
+      return value ? JSON.parse(value) : undefined;
+    } catch {
+      return undefined;
+    }
+  })
+  filterTree?: unknown;
+
   @IsOptional()
   @Transform(({ value }) => {
     try {
