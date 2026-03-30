@@ -9,6 +9,7 @@ export type CriteriaFilterOperator =
   | "startsWith"
   | "endsWith"
   | "in"
+  | "notIn"     // Not(In(...)) — uso interno tras merge de neq / exclusiones
   | "between"
   | "isNull"
   | "notNull"
