@@ -3,12 +3,14 @@ import {
   FindManyOptions,
   ILike,
   In,
+  IsNull,
   LessThan,
   LessThanOrEqual,
   MoreThan,
   MoreThanOrEqual,
   Not,
 } from "typeorm";
+import { inspect } from "util";
 
 import { CriteriaTranslatorPort } from "../../reader/criteria/CriteriaTranslatorPort";
 import {
@@ -26,14 +28,17 @@ import {
 } from "../../reader/criteria/ReadCriteria";
 import { FilterCriteria } from "../../reader/criteria/FilterCriteria";
 
-export class TypeOrmCriteriaTranslator<T>
-  implements CriteriaTranslatorPort<FindManyOptions<T>> {
+export class TypeOrmCriteriaTranslator<T> implements CriteriaTranslatorPort<
+  FindManyOptions<T>
+> {
+  private isSearchDebugEnabled(): boolean {
+    return process.env.SEARCH_DEBUG === "1";
+  }
 
   translate(criteria: ReadCriteria<keyof T & string>): FindManyOptions<T> {
     const options: FindManyOptions<T> = {};
 
-    const maxDnf =
-      criteria.maxDNFClauses ?? DEFAULT_MAX_DNF_CLAUSES;
+    const maxDnf = criteria.maxDNFClauses ?? DEFAULT_MAX_DNF_CLAUSES;
 
     let ast: CriteriaNode<keyof T & string> | undefined;
     if (criteria.filterTree) {
@@ -42,21 +47,43 @@ export class TypeOrmCriteriaTranslator<T>
       ast = filtersToFilterTree(criteria.filters);
     }
 
-    const inferredRelationsFromFilters =
-      ast
-        ? this.inferRelationsFromFilters(
-          collectLeavesFromFilterTree(ast).map(leafNodeToFilterCriteria)
-        )
-        : undefined;
+    const leaves = ast
+      ? collectLeavesFromFilterTree(ast).map(leafNodeToFilterCriteria)
+      : [];
 
-    const normalizedExplicitRelations =
-      criteria.relations
-        ? this.normalizeRelations(criteria.relations)
-        : undefined;
+    const inferredRelationsFromFilters = ast
+      ? this.inferRelationsFromFilters(leaves)
+      : undefined;
+
+    const shouldDebugSearchCriteria =
+      this.isSearchDebugEnabled() &&
+      leaves.some((leaf) => {
+        const field = String(leaf.field);
+        return (
+          field === "capacityPolicy" ||
+          field === "capacityMax" ||
+          field === "resourceType.code"
+        );
+      });
+
+    if (shouldDebugSearchCriteria) {
+      console.log(
+        "[search.debug] translator criteria",
+        inspect(criteria, { depth: 8 }),
+      );
+      console.log(
+        "[search.debug] translator leaves",
+        inspect(leaves, { depth: 8 }),
+      );
+    }
+
+    const normalizedExplicitRelations = criteria.relations
+      ? this.normalizeRelations(criteria.relations)
+      : undefined;
 
     const mergedRelations = this.deepMerge(
       this.deepClone(normalizedExplicitRelations),
-      inferredRelationsFromFilters
+      inferredRelationsFromFilters,
     );
 
     if (mergedRelations && Object.keys(mergedRelations).length) {
@@ -66,14 +93,11 @@ export class TypeOrmCriteriaTranslator<T>
     if (ast) {
       const dnf = expandFilterTreeToDnf(ast, maxDnf);
       if (!dnf.some((conj) => conj.length === 0)) {
-        const mergedClauses = dnf.map((conj) =>
-          mergeConjunctionLeaves(conj)
-        );
+        const mergedClauses = dnf.map((conj) => mergeConjunctionLeaves(conj));
         const wheres = mergedClauses.map((leaves) =>
-          this.buildWhereFromLeaves(leaves)
+          this.buildWhereFromLeaves(leaves),
         );
-        options.where =
-          wheres.length === 1 ? wheres[0] : wheres;
+        options.where = wheres.length === 1 ? wheres[0] : wheres;
       }
     }
 
@@ -82,19 +106,31 @@ export class TypeOrmCriteriaTranslator<T>
     }
 
     if (criteria.pagination) {
-      options.skip =
-        (criteria.pagination.page - 1) *
-        criteria.pagination.limit;
+      options.skip = (criteria.pagination.page - 1) * criteria.pagination.limit;
 
-      options.take =
-        criteria.pagination.limit;
+      options.take = criteria.pagination.limit;
+    }
+
+    if (shouldDebugSearchCriteria) {
+      console.log(
+        "[search.debug] translator options.where",
+        inspect(options.where, { depth: 8 }),
+      );
+      console.log(
+        "[search.debug] translator options.order",
+        inspect(options.order, { depth: 8 }),
+      );
+      console.log("[search.debug] translator options.pagination", {
+        skip: options.skip,
+        take: options.take,
+      });
     }
 
     return options;
   }
 
   private buildWhereFromLeaves(
-    filters: FilterCriteria<keyof T & string>[]
+    filters: FilterCriteria<keyof T & string>[],
   ): any {
     const where: any = {};
 
@@ -112,7 +148,6 @@ export class TypeOrmCriteriaTranslator<T>
       }
 
       switch (f.operator) {
-
         case "eq":
           where[f.field] = f.value;
           break;
@@ -158,30 +193,25 @@ export class TypeOrmCriteriaTranslator<T>
           break;
 
         case "in":
-          where[f.field] = In(
-            Array.isArray(f.value) ? f.value : [f.value]
-          );
+          where[f.field] = In(Array.isArray(f.value) ? f.value : [f.value]);
           break;
 
         case "notIn":
           where[f.field] = Not(
-            In(Array.isArray(f.value) ? f.value : [f.value])
+            In(Array.isArray(f.value) ? f.value : [f.value]),
           );
           break;
 
         case "between":
-          where[f.field] = Between(
-            f.value[0],
-            f.value[1]
-          );
+          where[f.field] = Between(f.value[0], f.value[1]);
           break;
 
         case "isNull":
-          where[f.field] = null;
+          where[f.field] = IsNull();
           break;
 
         case "notNull":
-          where[f.field] = Not(null);
+          where[f.field] = Not(IsNull());
           break;
 
         default:
@@ -223,16 +253,16 @@ export class TypeOrmCriteriaTranslator<T>
       case "between":
         return Between(f.value[0], f.value[1]);
       case "isNull":
-        return null;
+        return IsNull();
       case "notNull":
-        return Not(null);
+        return Not(IsNull());
       default:
         return f.value;
     }
   }
 
   private inferRelationsFromFilters(
-    filters: FilterCriteria<keyof T & string>[]
+    filters: FilterCriteria<keyof T & string>[],
   ): Record<string, any> | undefined {
     let result: Record<string, any> | undefined = undefined;
 
@@ -271,7 +301,10 @@ export class TypeOrmCriteriaTranslator<T>
     return this.buildNestedObject(parts, true);
   }
 
-  private buildNestedObject(parts: string[], leafValue: any): Record<string, any> {
+  private buildNestedObject(
+    parts: string[],
+    leafValue: any,
+  ): Record<string, any> {
     const root: Record<string, any> = {};
     let cursor: any = root;
 
@@ -326,7 +359,6 @@ export class TypeOrmCriteriaTranslator<T>
     }
     return out;
   }
-
 
   private buildOrder(sort: ReadCriteria["sort"]): any {
     const order: any = {};
