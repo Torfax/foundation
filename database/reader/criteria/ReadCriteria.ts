@@ -7,6 +7,8 @@ export type ReadRelations =
   | string[]
   | Record<string, any>;
 
+export type ReadSelect<F extends string = string> = F[];
+
 /** Default cap for OR clauses after DNF expansion. */
 export const DEFAULT_MAX_DNF_CLAUSES = 100;
 
@@ -26,4 +28,5 @@ export interface ReadCriteria<F extends string = string> {
   sort?: SortCriteria<F>[];
   pagination?: PaginationCriteria;
   relations?: ReadRelations;
+  select?: ReadSelect<F>;
 }

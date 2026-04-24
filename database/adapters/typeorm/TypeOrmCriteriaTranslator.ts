@@ -90,6 +90,10 @@ export class TypeOrmCriteriaTranslator<T> implements CriteriaTranslatorPort<
       (options as any).relations = mergedRelations;
     }
 
+    if (criteria.select?.length) {
+      (options as any).select = criteria.select;
+    }
+
     if (ast) {
       const dnf = expandFilterTreeToDnf(ast, maxDnf);
       if (!dnf.some((conj) => conj.length === 0)) {

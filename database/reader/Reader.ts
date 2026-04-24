@@ -1,6 +1,7 @@
 import { NotFoundException } from "@src/core/exceptions/HttpException";
 import { CriteriaTranslatorPort } from "./criteria/CriteriaTranslatorPort";
 import { ReadCriteria } from "./criteria/ReadCriteria";
+import { mergeReadCriteria } from "./criteria/ReadCriteriaUtils";
 import { ReadDataSourcePort } from "./ReadDataSourcePort";
 import { ListConfig, PaginatedResult, PaginationMeta } from "./query/PaginationTypes";
 
@@ -45,24 +46,34 @@ export class Reader<Q, R> {
   // By ID
   // --------------------
 
-  async findById(id: EntityId): Promise<R | null> {
-    return this.findOne({
-      filters: [{
-        field: "id" as keyof R & string,
-        operator: "eq",
-        value: String(id)
-      }]
-    });
+  private buildIdCriteria(
+    id: EntityId,
+    criteria?: ReadCriteria<keyof R & string>
+  ): ReadCriteria<keyof R & string> {
+    return mergeReadCriteria(
+      {
+        filters: [{
+          field: "id" as keyof R & string,
+          operator: "eq",
+          value: String(id)
+        }]
+      },
+      criteria
+    );
   }
 
-  async getById(id: EntityId): Promise<R> {
-    return this.getOne({
-      filters: [{
-        field: "id" as keyof R & string,
-        operator: "eq",
-        value: String(id)
-      }]
-    });
+  async findById(
+    id: EntityId,
+    criteria?: ReadCriteria<keyof R & string>
+  ): Promise<R | null> {
+    return this.findOne(this.buildIdCriteria(id, criteria));
+  }
+
+  async getById(
+    id: EntityId,
+    criteria?: ReadCriteria<keyof R & string>
+  ): Promise<R> {
+    return this.getOne(this.buildIdCriteria(id, criteria));
   }
 
   // --------------------
