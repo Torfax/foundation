@@ -22,4 +22,6 @@ export default interface BaseEnv {
   ENABLED_SWAGGER? : boolean;
 
   JWT_SECRET : string;
+
+  STAFF_NOTIFICATION_RECIPIENTS?: string;
 }

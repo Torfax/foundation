@@ -34,6 +34,20 @@ export class ConfigService<T extends Record<string, any> = BaseEnv> {
     return this.autoConvert(value);
   }
 
+  getStringArray(key: string, defaultValue?: string[]): string[] {
+    const value = this.env[key];
+
+    if (value === undefined || value === null || value === "") {
+      if (defaultValue) return [...defaultValue];
+      throw new Error(`Config Error: missing environment variable "${String(key)}"`);
+    }
+
+    return value
+      .split(",")
+      .map((item) => item.trim())
+      .filter((item) => item.length > 0);
+  }
+
 
   /**
    * Convierte automáticamente valores string a boolean, number o JSON.
