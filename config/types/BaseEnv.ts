@@ -23,5 +23,7 @@ export default interface BaseEnv {
 
   JWT_SECRET : string;
 
+  APP_TIMEZONE: string;
+
   STAFF_NOTIFICATION_RECIPIENTS?: string;
 }
