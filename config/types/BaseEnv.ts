@@ -25,5 +25,8 @@ export default interface BaseEnv {
 
   APP_TIMEZONE: string;
 
+  APP_DEFAULT_CHECK_IN_TIME?: string;
+  APP_DEFAULT_CHECK_OUT_TIME?: string;
+
   STAFF_NOTIFICATION_RECIPIENTS?: string;
 }
