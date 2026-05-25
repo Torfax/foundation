@@ -2,24 +2,38 @@ import { Repository } from "typeorm";
 import { DataSourceDriver } from "./adapters/DataSourceDriver";
 import { EntityConstructor } from "./EntityConstructor";
 import { Reader } from "./reader/Reader";
+import { ReadDataSourcePort } from "./reader/ReadDataSourcePort";
+import { CriteriaTranslatorPort } from "./reader/criteria/CriteriaTranslatorPort";
+import { Updater } from "./update/Updater";
+import { UpdateDataSourcePort } from "./update/UpdateDataSourcePort";
 
 export class EntityStore<E extends object> {
 
   readonly reader: Reader<any, E>;
+  readonly updater: Updater<any, E>;
+  private readonly translator: CriteriaTranslatorPort<any>;
+  private readonly readAdapter: ReadDataSourcePort<any, E>;
+  private readonly updateAdapter: UpdateDataSourcePort<any, E>;
 
   constructor(
     private readonly driver: DataSourceDriver<any>,
     private readonly entity: EntityConstructor<E>
   ) {
 
+    this.translator = this.driver.createCriteriaTranslator();
+    this.readAdapter = this.driver.createReadAdapter(this.entity);
+    this.updateAdapter = this.driver.createUpdateAdapter(this.entity);
+
     this.reader = this.createReader();
+    this.updater = this.createUpdater();
   }
 
   private createReader(): Reader<any, E> {
-    const translator = this.driver.createCriteriaTranslator();
-    const adapter = this.driver.createReadAdapter(this.entity);
+    return new Reader(this.translator, this.readAdapter);
+  }
 
-    return new Reader(translator, adapter);
+  private createUpdater(): Updater<any, E> {
+    return new Updater(this.translator, this.readAdapter, this.updateAdapter);
   }
 
   async raw<R>(
