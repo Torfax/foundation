@@ -1,7 +1,7 @@
 // src/core/config/BaseEnv.ts
 export default interface BaseEnv {
   /** Environment mode */
-  NODE_ENV: 'development' | 'production' | 'test';
+  NODE_ENV: 'development' | 'production' | 'test' | 'dev' | 'testing';
 
   /** Server configuration */
   PORT: number;
@@ -31,6 +31,15 @@ export default interface BaseEnv {
   STAFF_NOTIFICATION_RECIPIENTS?: string;
 
   FRONTEND_URL?: string;
+  CORS_ALLOWED_ORIGINS?: string;
+  PAYWAY_TOKEN?: string;
+  PAYWAY_BUTTON_URL?: string;
+  PAYWAY_RETAILER_OWNER?: string;
+  PAYWAY_USER_OPERATION?: string;
+  PAYWAY_ENCRYPTION_KEY?: string;
+  PAYWAY_QUOTE_TOKEN_SECRET?: string;
+  PAYWAY_CALLBACK_TOKEN_SECRET?: string;
+  PAYWAY_DEV_CLIENT_IP_OVERRIDE?: string;
   EMAIL_BRAND_LOGO_URL?: string;
   EMAIL_SUPPORT_EMAIL?: string;
   EMAIL_ADMIN_DASHBOARD_URL?: string;
