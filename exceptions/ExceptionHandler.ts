@@ -47,7 +47,6 @@ export class ExceptionHandler {
   private static handleHttpException(exception: HttpException, req: Request, res: Response) {
     const statusCode = exception.statusCode;
     const errorCode = ExceptionHandler.getErrorCode(exception);
-    console.log("HOLA LLEGUA ACA Y ESTO ES LO QUE TIENE DATA ", exception.data);
     const errorResponse: ErrorResponse = {
       success: false,
       error: {
