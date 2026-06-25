@@ -9,11 +9,12 @@ export default interface BaseEnv {
 
   /** Database configuration */
   DB_TYPE: 'mysql' | 'postgres' | 'sqlite' | 'mariadb';
-  DB_HOST: string;
-  DB_PORT: number;
-  DB_NAME: string;
-  DB_USER: string;
-  DB_PASSWORD: string;
+  DB_HOST?: string;
+  DB_PORT?: number;
+  DB_NAME?: string;
+  DB_USER?: string;
+  DB_PASSWORD?: string;
+  DATABASE_PATH?: string;
 
   /** Optional full connection string */
   DATABASE_URL?: string;
@@ -30,7 +31,7 @@ export default interface BaseEnv {
 
   STAFF_NOTIFICATION_RECIPIENTS?: string;
 
-  FRONTEND_URL?: string;
+  FRONTEND_URL: string;
   CORS_ALLOWED_ORIGINS?: string;
   PAYWAY_TOKEN?: string;
   PAYWAY_BUTTON_URL?: string;
@@ -42,12 +43,15 @@ export default interface BaseEnv {
   PAYWAY_DEV_CLIENT_IP_OVERRIDE?: string;
   EMAIL_BRAND_LOGO_URL?: string;
   EMAIL_SUPPORT_EMAIL?: string;
-  EMAIL_ADMIN_DASHBOARD_URL?: string;
-  EMAIL_LOGIN_URL?: string;
+  EMAIL_ADMIN_DASHBOARD_PATH?: string;
+  EMAIL_LOGIN_PATH?: string;
+  EMAIL_PASSWORD_SETUP_PATH?: string;
   EMAIL_FROM?: string;
   EMAIL_FROM_NAME?: string;
+  EMAIL_DRIVER?: "smtp" | "console";
   SMTP_HOST?: string;
   SMTP_PORT?: number;
   SMTP_USER?: string;
   SMTP_PASSWORD?: string;
+  PASSWORD_ACCESS_TOKEN_TTL_MINUTES?: number;
 }

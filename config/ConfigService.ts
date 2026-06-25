@@ -13,13 +13,10 @@ export class ConfigService<T extends Record<string, any> = BaseEnv> {
     };
   }
 
-  // --- Sobrecarga 1: claves conocidas (autocompletado + tipo fuerte)
-  get<K extends keyof T>(key: K, defaultValue?: T[K]): T[K];
-
-  // --- Sobrecarga 2: claves no tipadas (retorna string | any)
-  get(key: string, defaultValue?: any): any;
-
-  // --- Implementación real (una sola)
+  get<K extends keyof T>(key: K): T[K] | undefined;
+  get<K extends keyof T>(key: K, defaultValue: T[K]): T[K];
+  get(key: string): any;
+  get(key: string, defaultValue: any): any;
   get(key: string, ...maybeDefault: any[]): any {
     const hasDefault = maybeDefault.length > 0;
     const defaultValue = hasDefault ? maybeDefault[0] : undefined;
@@ -27,7 +24,18 @@ export class ConfigService<T extends Record<string, any> = BaseEnv> {
     const value = this.env[key];
 
     if (value === undefined || value === null || value === "") {
-      if (hasDefault) return defaultValue;
+      return hasDefault ? defaultValue : undefined;
+    }
+
+    return this.autoConvert(value);
+  }
+
+  getRequired<K extends keyof T>(key: K): T[K];
+  getRequired(key: string): any;
+  getRequired(key: string): any {
+    const value = this.env[key];
+
+    if (value === undefined || value === null || value === "") {
       throw new Error(`Config Error: missing environment variable "${String(key)}"`);
     }
 
@@ -48,22 +56,17 @@ export class ConfigService<T extends Record<string, any> = BaseEnv> {
       .filter((item) => item.length > 0);
   }
 
-
-  /**
-   * Convierte automáticamente valores string a boolean, number o JSON.
-   */
   private autoConvert(value: string): any {
     const lower = value.toLowerCase();
 
-    // Boolean
     if (lower === "true" || lower === "false") return lower === "true";
 
-    // Number
     if (!isNaN(Number(value)) && value.trim() !== "") return Number(value);
 
-    // JSON
-    if ((value.startsWith("{") && value.endsWith("}")) ||
-      (value.startsWith("[") && value.endsWith("]"))) {
+    if (
+      (value.startsWith("{") && value.endsWith("}")) ||
+      (value.startsWith("[") && value.endsWith("]"))
+    ) {
       try {
         return JSON.parse(value);
       } catch {
@@ -78,6 +81,3 @@ export class ConfigService<T extends Record<string, any> = BaseEnv> {
     return this.env;
   }
 }
-
-/* const configService = new ConfigService<BaseEnv>();
-export default configService; */
