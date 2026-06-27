@@ -54,4 +54,9 @@ export default interface BaseEnv {
   SMTP_USER?: string;
   SMTP_PASSWORD?: string;
   PASSWORD_ACCESS_TOKEN_TTL_MINUTES?: number;
+
+  /** Días de gracia tras start_datetime para permitir reprogramar (default 3). */
+  RESERVATION_RESCHEDULE_GRACE_DAYS?: number;
+  /** Máximo de reprogramaciones reales por reserva (default 2). */
+  RESERVATION_MAX_RESCHEDULES?: number;
 }
