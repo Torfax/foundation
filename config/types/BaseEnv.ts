@@ -59,4 +59,15 @@ export default interface BaseEnv {
   RESERVATION_RESCHEDULE_GRACE_DAYS?: number;
   /** Máximo de reprogramaciones reales por reserva (default 2). */
   RESERVATION_MAX_RESCHEDULES?: number;
+
+  /** Integration Jobs: segundos de vigencia de un claim antes de poder reciclarse (default 120). */
+  INTEGRATION_CLAIM_TTL_SECONDS?: number;
+  /** Integration Jobs: base de backoff (segundos) para reintentos tras fallo (default 30). */
+  INTEGRATION_RETRY_BACKOFF_SECONDS?: number;
+  /** Integration Jobs: timeout por defecto de callAndWait en ms (default 8000). */
+  INTEGRATION_CALLANDWAIT_DEFAULT_TIMEOUT_MS?: number;
+  /** Integration Jobs: intervalo de sondeo a DB de callAndWait en ms (default 250). */
+  INTEGRATION_CALLANDWAIT_POLL_INTERVAL_MS?: number;
+  /** Integration Jobs: throttle de actualización de last_seen_at del agente en segundos (default 30). */
+  INTEGRATION_AGENT_LAST_SEEN_THROTTLE_SECONDS?: number;
 }
