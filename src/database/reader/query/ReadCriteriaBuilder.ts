@@ -3,7 +3,7 @@ import { CriteriaNode } from "../criteria/CriteriaFilterTree";
 import { FilterCriteria } from "../criteria/FilterCriteria";
 import { PaginationCriteria } from "../criteria/PaginationCriteria";
 import { SortCriteria } from "../criteria/SortCriteria";
-import { ListQueryDto } from "@src/core/database/reader/query/ListQueryDto";
+import { ListQueryDto } from "./ListQueryDto";
 
 export type EntityFields<T> = keyof T & string;
 

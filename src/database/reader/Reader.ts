@@ -1,4 +1,4 @@
-import { NotFoundException } from "@src/core/exceptions/HttpException";
+import { NotFoundException } from "../../exceptions/HttpException";
 import { CriteriaTranslatorPort } from "./criteria/CriteriaTranslatorPort";
 import { ReadCriteria } from "./criteria/ReadCriteria";
 import { mergeReadCriteria } from "./criteria/ReadCriteriaUtils";

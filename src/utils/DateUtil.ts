@@ -1,4 +1,4 @@
-import { DayOfWeek } from "@src/core/types/DayOfWeek";
+import { DayOfWeek } from "../types/DayOfWeek";
 
 const dayMap: Record<number, DayOfWeek> = {
   0: DayOfWeek.SUNDAY,

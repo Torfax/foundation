@@ -1,4 +1,4 @@
-import { BadRequestException } from "@src/core/exceptions/HttpException";
+import { BadRequestException } from "../../exceptions/HttpException";
 import { UpdateConfig } from "./UpdateConfig";
 import {
   BuildUpdatePatchOptions,

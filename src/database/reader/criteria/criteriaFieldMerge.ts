@@ -1,4 +1,4 @@
-import { BadRequestException } from "@src/core/exceptions/HttpException";
+import { BadRequestException } from "../../../exceptions/HttpException";
 
 import { CriteriaFilterOperator } from "./CriteriaFilterOperator";
 import { FilterCriteria } from "./FilterCriteria";

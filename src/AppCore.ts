@@ -1,4 +1,4 @@
-import { ConfigService } from "@src/core/config/ConfigService";
+import { ConfigService } from "./config/ConfigService";
 import { FilesModule, FilesModuleOptions } from "./files";
 
 export interface AppCoreOptions {
