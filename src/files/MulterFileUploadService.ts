@@ -95,8 +95,6 @@ export class MulterFileUploadService {
     // Si ya viene de diskStorage → todo ok
     if (file.path) {
       const relativePath = this.getRelativePath(file.path);
-      console.log("Este es el relative path: ", relativePath);
-      console.log("Este es el path normal: ", file.path);
       return {
         ...file,
         storedPath: file.path,

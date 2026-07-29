@@ -10,7 +10,6 @@ import {
   MoreThanOrEqual,
   Not,
 } from "typeorm";
-import { inspect } from "util";
 
 import { CriteriaTranslatorPort } from "../../reader/criteria/CriteriaTranslatorPort";
 import {
@@ -31,9 +30,6 @@ import { FilterCriteria } from "../../reader/criteria/FilterCriteria";
 export class TypeOrmCriteriaTranslator<T> implements CriteriaTranslatorPort<
   FindManyOptions<T>
 > {
-  private isSearchDebugEnabled(): boolean {
-    return process.env.SEARCH_DEBUG === "1";
-  }
 
   translate(criteria: ReadCriteria<keyof T & string>): FindManyOptions<T> {
     const options: FindManyOptions<T> = {};
@@ -54,28 +50,6 @@ export class TypeOrmCriteriaTranslator<T> implements CriteriaTranslatorPort<
     const inferredRelationsFromFilters = ast
       ? this.inferRelationsFromFilters(leaves)
       : undefined;
-
-    const shouldDebugSearchCriteria =
-      this.isSearchDebugEnabled() &&
-      leaves.some((leaf) => {
-        const field = String(leaf.field);
-        return (
-          field === "capacityPolicy" ||
-          field === "capacityMax" ||
-          field === "resourceType.code"
-        );
-      });
-
-    if (shouldDebugSearchCriteria) {
-      console.log(
-        "[search.debug] translator criteria",
-        inspect(criteria, { depth: 8 }),
-      );
-      console.log(
-        "[search.debug] translator leaves",
-        inspect(leaves, { depth: 8 }),
-      );
-    }
 
     const normalizedExplicitRelations = criteria.relations
       ? this.normalizeRelations(criteria.relations)
@@ -113,21 +87,6 @@ export class TypeOrmCriteriaTranslator<T> implements CriteriaTranslatorPort<
       options.skip = (criteria.pagination.page - 1) * criteria.pagination.limit;
 
       options.take = criteria.pagination.limit;
-    }
-
-    if (shouldDebugSearchCriteria) {
-      console.log(
-        "[search.debug] translator options.where",
-        inspect(options.where, { depth: 8 }),
-      );
-      console.log(
-        "[search.debug] translator options.order",
-        inspect(options.order, { depth: 8 }),
-      );
-      console.log("[search.debug] translator options.pagination", {
-        skip: options.skip,
-        take: options.take,
-      });
     }
 
     return options;

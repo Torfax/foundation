@@ -1,13 +1,12 @@
-import BaseEnv from "./types/BaseEnv";
-
 /**
  * Reads configuration from `process.env`.
  *
  * The host application is responsible for loading environment variables (e.g. via
  * dotenv) before constructing this service — the package never touches the global
- * environment on import.
+ * environment on import. Pass your own env shape as the type parameter:
+ * `new ConfigService<MyEnv>()`.
  */
-export class ConfigService<T extends Record<string, any> = BaseEnv> {
+export class ConfigService<T extends Record<string, any> = Record<string, any>> {
   private readonly env: Record<string, string | undefined>;
 
   constructor(extraSchema?: Partial<T>) {
