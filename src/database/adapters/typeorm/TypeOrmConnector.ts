@@ -1,21 +1,20 @@
 import {
-    DataSource,
-    FindManyOptions,
-    Repository,
-    ObjectLiteral,
-    EntityTarget
+  DataSource,
+  FindManyOptions,
+  ObjectLiteral,
+  Repository,
 } from "typeorm";
 
-import { DataSourceDriver } from "../DataSourceDriver";
+import { Connector } from "../Connector";
 import { TypeOrmCriteriaTranslator } from "./TypeOrmCriteriaTranslator";
-import { TypeOrmReadRepositoryAdapter } from "./TypeOrmReadRepositoryAdapter";
+import { TypeOrmReadAdapter } from "./TypeOrmReadAdapter";
 import { ReadDataSourcePort } from "../../reader/ReadDataSourcePort";
 import { EntityConstructor } from "../../EntityConstructor";
-import { UpdateDataSourcePort } from "../../update/UpdateDataSourcePort";
-import { TypeOrmUpdateRepositoryAdapter } from "./TypeOrmUpdateRepositoryAdapter";
+import { WriteDataSourcePort } from "../../writer/WriteDataSourcePort";
+import { TypeOrmWriteAdapter } from "./TypeOrmWriteAdapter";
 
-export class TypeOrmDriver
-  implements DataSourceDriver<FindManyOptions<any>> {
+export class TypeOrmConnector
+  implements Connector<FindManyOptions<any>> {
 
   constructor(private readonly dataSource: DataSource) {}
 
@@ -29,19 +28,19 @@ export class TypeOrmDriver
 
     const repository = this.dataSource.getRepository(entity);
 
-    return new TypeOrmReadRepositoryAdapter(repository) as unknown as ReadDataSourcePort<
+    return new TypeOrmReadAdapter(repository) as unknown as ReadDataSourcePort<
         FindManyOptions<any>,
         E
       >;
   }
 
-  createUpdateAdapter<E extends ObjectLiteral>(
+  createWriteAdapter<E extends ObjectLiteral>(
     entity: EntityConstructor<E>
-  ): UpdateDataSourcePort<FindManyOptions<any>, E> {
+  ): WriteDataSourcePort<FindManyOptions<any>, E> {
 
     const repository = this.dataSource.getRepository(entity);
 
-    return new TypeOrmUpdateRepositoryAdapter(repository, entity) as unknown as UpdateDataSourcePort<
+    return new TypeOrmWriteAdapter(repository, entity) as unknown as WriteDataSourcePort<
       FindManyOptions<any>,
       E
     >;
@@ -57,4 +56,3 @@ export class TypeOrmDriver
     return operation(repository);
   }
 }
-

@@ -1,48 +1,48 @@
 import { Repository } from "typeorm";
-import { DataSourceDriver } from "./adapters/DataSourceDriver";
+import { Connector } from "./adapters/Connector";
 import { EntityConstructor } from "./EntityConstructor";
 import { Reader } from "./reader/Reader";
 import { ReadDataSourcePort } from "./reader/ReadDataSourcePort";
 import { CriteriaTranslatorPort } from "./reader/criteria/CriteriaTranslatorPort";
-import { Updater } from "./update/Updater";
-import { UpdateDataSourcePort } from "./update/UpdateDataSourcePort";
+import { Writer } from "./writer/Writer";
+import { WriteDataSourcePort } from "./writer/WriteDataSourcePort";
 
 export class EntityStore<E extends object> {
 
   readonly reader: Reader<any, E>;
-  readonly updater: Updater<any, E>;
+  readonly writer: Writer<any, E>;
   private readonly translator: CriteriaTranslatorPort<any>;
   private readonly readAdapter: ReadDataSourcePort<any, E>;
-  private readonly updateAdapter: UpdateDataSourcePort<any, E>;
+  private readonly writeAdapter: WriteDataSourcePort<any, E>;
 
   constructor(
-    private readonly driver: DataSourceDriver<any>,
+    private readonly connector: Connector<any>,
     private readonly entity: EntityConstructor<E>
   ) {
 
-    this.translator = this.driver.createCriteriaTranslator();
-    this.readAdapter = this.driver.createReadAdapter(this.entity);
-    this.updateAdapter = this.driver.createUpdateAdapter(this.entity);
+    this.translator = this.connector.createCriteriaTranslator();
+    this.readAdapter = this.connector.createReadAdapter(this.entity);
+    this.writeAdapter = this.connector.createWriteAdapter(this.entity);
 
     this.reader = this.createReader();
-    this.updater = this.createUpdater();
+    this.writer = this.createWriter();
   }
 
   private createReader(): Reader<any, E> {
     return new Reader(this.translator, this.readAdapter);
   }
 
-  private createUpdater(): Updater<any, E> {
-    return new Updater(this.translator, this.readAdapter, this.updateAdapter);
+  private createWriter(): Writer<any, E> {
+    return new Writer(this.translator, this.readAdapter, this.writeAdapter);
   }
 
   async raw<R>(
 
-    /* 
+    /*
       Notice/Warn/TODO:
 
       El tipo Repository realmente no se deberia de
-      ocupar aca.. ya que este objeto pertenece 
+      ocupar aca.. ya que este objeto pertenece
       a typeorm y se supone que foundation debe
       de ser agnostico al orm
 
@@ -51,7 +51,6 @@ export class EntityStore<E extends object> {
     */
     operation: (repo: Repository<E>) => Promise<R>
   ): Promise<R> {
-    return this.driver.raw<E, R>(this.entity, operation);
+    return this.connector.raw<E, R>(this.entity, operation);
   }
 }
-

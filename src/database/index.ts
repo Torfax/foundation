@@ -5,13 +5,13 @@ export * from "./BaseRespository";
 export * from "./EntityConstructor";
 export * from "./EntityStore";
 
-// Adapters & drivers
-export * from "./adapters/DataSourceDriver";
-export * from "./adapters/typeorm/TypeOrmDriver";
-export * from "./adapters/typeorm/createTypeOrmDriver";
+// Connector & adapters
+export * from "./adapters/Connector";
+export * from "./adapters/typeorm/TypeOrmConnector";
+export * from "./adapters/typeorm/createTypeOrmConnector";
 export * from "./adapters/typeorm/TypeOrmCriteriaTranslator";
-export * from "./adapters/typeorm/TypeOrmReadRepositoryAdapter";
-export * from "./adapters/typeorm/TypeOrmUpdateRepositoryAdapter";
+export * from "./adapters/typeorm/TypeOrmReadAdapter";
+export * from "./adapters/typeorm/TypeOrmWriteAdapter";
 
 // Reader + Criteria model
 export * from "./reader/Reader";
@@ -28,5 +28,5 @@ export * from "./reader/query/ListQueryDto";
 export * from "./reader/query/PaginationTypes";
 export * from "./reader/query/ReadCriteriaBuilder";
 
-// Update
-export * from "./update";
+// Writer
+export * from "./writer";

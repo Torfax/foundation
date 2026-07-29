@@ -1,6 +1,6 @@
 import { UpdateConfig } from "./UpdateConfig";
 
-export type UpdateEntityId = string | number | Number;
+export type WriteEntityId = string | number | Number;
 
 export type UpdateComparator<E extends object> = Partial<{
   [K in keyof E]: (oldValue: E[K], newValue: E[K]) => boolean;
@@ -32,7 +32,7 @@ export type BuildUpdatePatchOptions<
   comparators?: UpdateComparator<E>;
 };
 
-export type UpdateExecutionOptions = {
+export type WriteExecutionOptions = {
   manager?: any;
 };
 
@@ -40,13 +40,13 @@ export type DirectUpdateOptions<
   E extends object,
   C extends UpdateConfig<E, readonly (keyof E & string)[]>
 > = UpdateValidationOptions<E, C> &
-  UpdateExecutionOptions;
+  WriteExecutionOptions;
 
 export type ComparedUpdateOptions<
   E extends object,
   C extends UpdateConfig<E, readonly (keyof E & string)[]>
 > = BuildUpdatePatchOptions<E, C> &
-  UpdateExecutionOptions;
+  WriteExecutionOptions;
 
 export type DirectUpdateResult<E extends object> = {
   updateData: Partial<E>;
@@ -64,6 +64,6 @@ export type ComparedUpdateResult<E extends object> = {
   skippedReason?: "NO_CHANGES";
 };
 
-export type UpdateOperationResult = {
+export type WriteOperationResult = {
   affected?: number;
 };

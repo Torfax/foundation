@@ -3,26 +3,50 @@ import { ReadCriteria } from "../reader/criteria/ReadCriteria";
 import { Reader } from "../reader/Reader";
 import { ReadDataSourcePort } from "../reader/ReadDataSourcePort";
 import { UpdateConfig } from "./UpdateConfig";
-import { UpdateDataSourcePort } from "./UpdateDataSourcePort";
+import { WriteDataSourcePort } from "./WriteDataSourcePort";
 import { buildUpdatePatch, filterUpdatePatch } from "./buildUpdatePatch";
 import {
   ComparedUpdateOptions,
   ComparedUpdateResult,
   DirectUpdateOptions,
   DirectUpdateResult,
-  UpdateEntityId,
-} from "./UpdateTypes";
+  WriteEntityId,
+  WriteExecutionOptions,
+  WriteOperationResult,
+} from "./WriteTypes";
 
-export class Updater<Q, E extends object> {
+export class Writer<Q, E extends object> {
   private readonly reader: Reader<Q, E>;
 
   constructor(
     private readonly translator: CriteriaTranslatorPort<Q>,
     readRepository: ReadDataSourcePort<Q, E>,
-    private readonly updateRepository: UpdateDataSourcePort<Q, E>
+    private readonly writeRepository: WriteDataSourcePort<Q, E>
   ) {
     this.reader = new Reader(translator, readRepository);
   }
+
+  // --------------------
+  // Create
+  // --------------------
+
+  async create(
+    data: Partial<E>,
+    options?: WriteExecutionOptions
+  ): Promise<E> {
+    return this.writeRepository.create(data, options);
+  }
+
+  async createMany(
+    data: Partial<E>[],
+    options?: WriteExecutionOptions
+  ): Promise<E[]> {
+    return this.writeRepository.createMany(data, options);
+  }
+
+  // --------------------
+  // Update
+  // --------------------
 
   buildPatch<
     C extends UpdateConfig<E, readonly (keyof E & string)[]>
@@ -37,7 +61,7 @@ export class Updater<Q, E extends object> {
   async updateById<
     C extends UpdateConfig<E, readonly (keyof E & string)[]>
   >(
-    id: UpdateEntityId,
+    id: WriteEntityId,
     patch: Partial<E>,
     options: DirectUpdateOptions<E, C>
   ): Promise<DirectUpdateResult<E>> {
@@ -47,7 +71,7 @@ export class Updater<Q, E extends object> {
       return filtered;
     }
 
-    const result = await this.updateRepository.updateById(id, filtered.updateData, {
+    const result = await this.writeRepository.updateById(id, filtered.updateData, {
       manager: options.manager,
     });
 
@@ -72,7 +96,7 @@ export class Updater<Q, E extends object> {
     }
 
     const query = this.translator.translate(criteria);
-    const result = await this.updateRepository.updateByCriteria(query, filtered.updateData, {
+    const result = await this.writeRepository.updateByCriteria(query, filtered.updateData, {
       manager: options.manager,
     });
 
@@ -97,7 +121,7 @@ export class Updater<Q, E extends object> {
     }
 
     const query = this.translator.translate(criteria);
-    const result = await this.updateRepository.updateMany(query, filtered.updateData, {
+    const result = await this.writeRepository.updateMany(query, filtered.updateData, {
       manager: options.manager,
     });
 
@@ -111,7 +135,7 @@ export class Updater<Q, E extends object> {
   async updateByIdCompared<
     C extends UpdateConfig<E, readonly (keyof E & string)[]>
   >(
-    id: UpdateEntityId,
+    id: WriteEntityId,
     patch: Partial<E>,
     options: ComparedUpdateOptions<E, C>
   ): Promise<ComparedUpdateResult<E>> {
@@ -130,7 +154,7 @@ export class Updater<Q, E extends object> {
       };
     }
 
-    const result = await this.updateRepository.updateById(id, consolidated.updateData, {
+    const result = await this.writeRepository.updateById(id, consolidated.updateData, {
       manager: options.manager,
     });
 
@@ -142,5 +166,24 @@ export class Updater<Q, E extends object> {
       updated: (result.affected ?? 0) > 0,
       affected: result.affected,
     };
+  }
+
+  // --------------------
+  // Delete
+  // --------------------
+
+  async deleteById(
+    id: WriteEntityId,
+    options?: WriteExecutionOptions
+  ): Promise<WriteOperationResult> {
+    return this.writeRepository.deleteById(id, options);
+  }
+
+  async deleteByCriteria(
+    criteria: ReadCriteria<keyof E & string>,
+    options?: WriteExecutionOptions
+  ): Promise<WriteOperationResult> {
+    const query = this.translator.translate(criteria);
+    return this.writeRepository.deleteByCriteria(query, options);
   }
 }

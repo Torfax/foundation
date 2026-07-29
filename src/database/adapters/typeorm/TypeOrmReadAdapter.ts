@@ -1,7 +1,7 @@
 import { FindManyOptions, FindOneOptions, ObjectLiteral, Repository } from "typeorm";
 import { ReadDataSourcePort } from "../../reader/ReadDataSourcePort";
 
-export class TypeOrmReadRepositoryAdapter<E extends ObjectLiteral>
+export class TypeOrmReadAdapter<E extends ObjectLiteral>
     implements ReadDataSourcePort<FindManyOptions<E>, E> {
 
     constructor(

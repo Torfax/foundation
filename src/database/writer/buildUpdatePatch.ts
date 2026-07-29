@@ -4,7 +4,7 @@ import {
   BuildUpdatePatchOptions,
   ConsolidatedUpdate,
   DirectUpdateResult,
-} from "./UpdateTypes";
+} from "./WriteTypes";
 
 function hasOwn(input: object, field: PropertyKey): boolean {
   return Object.prototype.hasOwnProperty.call(input, field);
