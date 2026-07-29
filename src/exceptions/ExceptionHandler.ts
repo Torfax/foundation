@@ -1,4 +1,4 @@
-// src/core/middleware/exceptionHandler.ts
+// src/exceptions/ExceptionHandler.ts
 import { BadRequestException, HttpException, isHttpException, NotFoundException } from './HttpException';
 import { Request, Response, NextFunction } from 'express';
 

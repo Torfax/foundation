@@ -7,10 +7,8 @@ export * from "./EntityStore";
 
 // Adapters & drivers
 export * from "./adapters/DataSourceDriver";
-export * from "./adapters/DatabaseDriverName";
-export * from "./adapters/DriverRegistry";
-export * from "./adapters/DatabaseAdaptersBootstrap";
 export * from "./adapters/typeorm/TypeOrmDriver";
+export * from "./adapters/typeorm/createTypeOrmDriver";
 export * from "./adapters/typeorm/TypeOrmCriteriaTranslator";
 export * from "./adapters/typeorm/TypeOrmReadRepositoryAdapter";
 export * from "./adapters/typeorm/TypeOrmUpdateRepositoryAdapter";

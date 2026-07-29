@@ -1,4 +1,4 @@
-// src/core/exceptions/HttpException.ts
+// src/exceptions/HttpException.ts
 export class HttpException extends Error {
   public statusCode: number;
   public data?: any;

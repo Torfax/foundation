@@ -43,7 +43,7 @@ export class EntityStore<E extends object> {
 
       El tipo Repository realmente no se deberia de
       ocupar aca.. ya que este objeto pertenece 
-      a typeorm y se supone que el core debe
+      a typeorm y se supone que foundation debe
       de ser agnostico al orm
 
       sin embargo actualmente solo se esta trabajando

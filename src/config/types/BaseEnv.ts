@@ -1,4 +1,4 @@
-// src/core/config/BaseEnv.ts
+// src/config/types/BaseEnv.ts
 export default interface BaseEnv {
   /** Environment mode */
   NODE_ENV: 'development' | 'production' | 'test' | 'dev' | 'testing';

@@ -15,3 +15,6 @@ Se conservan aquí como referencia mientras se decide si:
 - `config/AppConfigBootstrap.ts` — Valida un esquema de entorno concreto
   (Payway, SMTP, JWT…) e importa el módulo de email de la app (`@src/modules/email`).
   Es configuración de la aplicación consumidora, no del foundation.
+- `AppCore.ts` — Composition root de la *aplicación*: ensambla `ConfigService` y
+  `FilesModule` para un host concreto. En el nuevo modelo, ensamblar es
+  responsabilidad del host (o de su bridge Nest), no del paquete.

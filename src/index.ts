@@ -27,6 +27,3 @@ export * from "./validators/MatchClVal";
 
 // Shared types
 export * from "./types/DayOfWeek";
-
-// Application composition root (convenience; optional)
-export * from "./AppCore";

@@ -1,8 +1,12 @@
-import dotenv from "dotenv";
 import BaseEnv from "./types/BaseEnv";
 
-dotenv.config();
-
+/**
+ * Reads configuration from `process.env`.
+ *
+ * The host application is responsible for loading environment variables (e.g. via
+ * dotenv) before constructing this service — the package never touches the global
+ * environment on import.
+ */
 export class ConfigService<T extends Record<string, any> = BaseEnv> {
   private readonly env: Record<string, string | undefined>;
 

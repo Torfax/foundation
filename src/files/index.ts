@@ -19,7 +19,7 @@ export interface FilesModuleOptions {
  * El patrón adoptado es:
  *
  * 1. Los módulos pueden recibir opciones de configuración desde el constructor.
- * 2. El Core permanece agnóstico (no define configuraciones concretas).
+ * 2. El paquete (foundation) permanece agnóstico (no define configuraciones concretas).
  * 3. La aplicación (AppContainer / bootstrap) es responsable de proporcionar
  *    dichas configuraciones.
  *
