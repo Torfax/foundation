@@ -5,41 +5,51 @@ _Fundamentos técnicos reutilizables y agnósticos de framework para aplicacione
 
 Package: `@torfax/foundation`
 
-## Purpose
+Foundation is a set of reusable technical building blocks — an ORM-agnostic data-access
+layer, HTTP primitives, an exception hierarchy, file upload + signed access, typed
+configuration and utilities — with **no business domain and no framework baked in**. It
+composes through **explicit dependency injection** (constructors + factories), so any
+host (a plain Node script, Express, NestJS) can assemble it.
 
-Foundation provides reusable technical building blocks — an ORM-agnostic data-access
-layer (Criteria pattern), HTTP primitives, an exception hierarchy, file upload and
-signed file access, typed configuration, and utilities — without coupling them to a
-specific business domain or framework.
-
-Torfax is its first consumer, but **Foundation does not depend on Torfax**.
+> Torfax is its first consumer, but **Foundation does not depend on Torfax**.
 
 ## Status
 
-Early development (`0.0.x`). The public API and internal package boundaries are **not
-stable yet**. The package is marked `private` to prevent accidental publishing; for now
-it is meant to be consumed locally (workspace link / `file:` / git).
+Early development (`0.0.x`). Public API and package boundaries are **not stable yet**.
+The package is marked `private` — it is consumed **locally** (see Install), not published.
 
-## Modules (`src/`)
+---
 
-- `database/` — ORM-agnostic data access via the Criteria pattern (reader + updater), with a TypeORM adapter.
-- `config/` — Typed environment configuration service.
-- `exceptions/` — Full HTTP exception hierarchy + Express exception handler.
-- `http/` — Response envelope and request helpers (Express).
-- `files/` — File upload (Multer) and signed file-access URLs (JWT).
-- `utils/` — Date, object, string and Zod helpers.
-- `validators/` — `class-validator` custom decorators.
+## Modules
 
-## Build
+| Import from `@torfax/foundation` | What it gives you |
+|---|---|
+| **database** | ORM-agnostic data access as a *datasource connector*: `Criteria` reads + `Writer` (create/update/delete), TypeORM adapter. See [src/database/README.md](src/database/README.md) & [USAGE.md](src/database/USAGE.md). |
+| **config** | `ConfigService` — typed `process.env` reader with auto-casting. |
+| **exceptions** | Full HTTP exception hierarchy + an Express exception handler. |
+| **http** | `HttpResponse` envelope + `HttpUtil` request helpers (Express). |
+| **files** | `FilesModule` — uploads (Multer) + signed file-access URLs (JWT). |
+| **validators** | `class-validator` custom decorators (e.g. `@MatchClVal`). |
+| **utils** | `DateUtil`, `ObjectUtil`, `StringUtil`, `ZodUtils`. |
 
-Sources live in `src/`; the built entry points live in `dist/`.
+Framework/heavy libs (`typeorm`, `express`, `class-validator`, `class-transformer`,
+`reflect-metadata`) are **optional peer dependencies**: the host provides its own copies,
+and you only need the ones for the parts you actually use.
+
+---
+
+## Install (local)
+
+Foundation ships TypeScript sources; the published entry points live in `dist/`, so build
+it once, then reference it from your project.
 
 ```bash
-pnpm install
-pnpm build      # tsc -> dist/
+# in foundation/
+npm install
+npm run build          # tsc -> dist/
 ```
 
-## Consume from another project (development)
+Point your project at it with a `file:` dependency (sibling folders):
 
 ```jsonc
 // consumer package.json
@@ -50,21 +60,141 @@ pnpm build      # tsc -> dist/
 }
 ```
 
-```ts
-import { EntityStore, NotFoundException, HttpResponse } from "@torfax/foundation";
+```bash
+# in the consumer
+npm install
 ```
 
-Heavy/framework dependencies (`typeorm`, `express`, `class-validator`, `class-transformer`,
-`reflect-metadata`) are declared as **optional peer dependencies** — the consuming app
-provides its own copies, and you only need the ones for the parts you actually use.
+Then install the peer deps you use, e.g. `npm i typeorm reflect-metadata` for `database`.
+When you change foundation, re-run `npm run build` (or `npm run build -- --watch`).
+
+---
+
+## Quickstart per module
+
+```ts
+// config — host loads env first (dotenv…); foundation never touches process.env on import
+import { ConfigService } from "@torfax/foundation";
+interface Env { PORT: number; DATABASE_URL: string; }
+const config = new ConfigService<Env>();
+config.getRequired("DATABASE_URL");     // throws if missing
+config.get("PORT", 3000);               // default + auto-cast "3000" -> 3000
+```
+
+```ts
+// exceptions
+import { NotFoundException, ExceptionHandler } from "@torfax/foundation";
+throw new NotFoundException("User not found");
+app.use(ExceptionHandler.handle());     // Express error middleware
+```
+
+```ts
+// http
+import { HttpResponse } from "@torfax/foundation";
+HttpResponse.success(res, user, "OK");        // { success, message, payload, statusCode }
+HttpResponse.err(res, null, "Failed", 400);
+```
+
+```ts
+// files
+import { FilesModule } from "@torfax/foundation";
+const files = new FilesModule({
+  upload: { destination: "uploads/avatars", maxFileSize: 5 * 1024 * 1024 },
+  access: { jwtSecret: process.env.FILE_SECRET! },
+});
+router.post("/avatar", files.api.upload.single("file"), handler);
+const url = files.api.access.buildProtectedUrl("uploads/avatars/x.png"); // signed URL
+```
+
+```ts
+// validators
+import { MatchClVal } from "@torfax/foundation";
+class SignupDto {
+  password!: string;
+  @MatchClVal("password") confirmPassword!: string;
+}
+```
+
+```ts
+// utils (namespaced)
+import { ObjectUtil, DateUtil } from "@torfax/foundation";
+ObjectUtil.excludeKeys(user, ["password"]);
+DateUtil.getDayOfWeek(new Date());
+```
+
+```ts
+// database — see src/database/USAGE.md for the full guide
+import { createTypeOrmConnector, BaseRepository } from "@torfax/foundation";
+
+class UserRepository extends BaseRepository {
+  private users = this.createStore(User);
+  list()          { return this.users.reader.paginate({ pagination: { page: 1, limit: 20 } }); }
+  create(d)       { return this.users.writer.create(d); }
+  remove(id)      { return this.users.writer.deleteById(id); }
+}
+```
+
+---
+
+## Composition (wiring it into an app)
+
+Foundation never wires itself — the **host is the composition root**. It chooses the
+connector, owns its lifecycle, and injects dependencies.
+
+### Plain Node / Express
+
+```ts
+import { DataSource } from "typeorm";
+import { createTypeOrmConnector } from "@torfax/foundation";
+
+const dataSource = await new DataSource({ /* ... */ }).initialize();
+const connector = createTypeOrmConnector(dataSource);
+
+const users = new UserRepository(connector);   // explicit injection
+```
+
+### NestJS
+
+Nest is *only* an external container: its providers call the same factories.
+
+```ts
+import { DataSource } from "typeorm";
+import { createTypeOrmConnector, Connector } from "@torfax/foundation";
+
+export const CONNECTOR = Symbol("CONNECTOR");
+
+@Module({
+  providers: [
+    {
+      provide: CONNECTOR,
+      inject: [DataSource],
+      useFactory: (ds: DataSource) => createTypeOrmConnector(ds),
+    },
+    {
+      provide: UserRepository,
+      inject: [CONNECTOR],
+      useFactory: (connector: Connector) => new UserRepository(connector),
+    },
+  ],
+  exports: [UserRepository],
+})
+export class DataModule {}
+```
+
+Same factories, same repositories — Nest just manages *when* instances are created and
+*how long* they live. No global registry, no framework baked into foundation.
+
+---
+
+## Scripts
+
+```bash
+npm run build       # compile to dist/
+npm run typecheck   # tsc --noEmit
+npm run clean       # remove dist/
+```
 
 ## Provenance
 
-Extracted from the `src/core` folder of the `aloja-api` project, preserving its full
-commit history (re-rooted at the repository root).
-
-## Notes
-
-- `app-coupled/` holds files carried over from the origin app that are **not** part of
-  the package build (they still reference application-specific modules). See
-  `app-coupled/README.md`.
+Extracted from an internal project's core folder, preserving its full commit history
+(re-rooted at the repository root).
