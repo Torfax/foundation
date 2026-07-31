@@ -1,4 +1,3 @@
-import { Repository } from "typeorm";
 import { Connector } from "./adapters/Connector";
 import { EntityConstructor } from "./EntityConstructor";
 import { Reader } from "./reader/Reader";
@@ -19,38 +18,20 @@ export class EntityStore<E extends object> {
     private readonly connector: Connector<any>,
     private readonly entity: EntityConstructor<E>
   ) {
-
     this.translator = this.connector.createCriteriaTranslator();
     this.readAdapter = this.connector.createReadAdapter(this.entity);
     this.writeAdapter = this.connector.createWriteAdapter(this.entity);
 
-    this.reader = this.createReader();
-    this.writer = this.createWriter();
+    this.reader = new Reader(this.translator, this.readAdapter);
+    this.writer = new Writer(this.translator, this.readAdapter, this.writeAdapter);
   }
 
-  private createReader(): Reader<any, E> {
-    return new Reader(this.translator, this.readAdapter);
-  }
-
-  private createWriter(): Writer<any, E> {
-    return new Writer(this.translator, this.readAdapter, this.writeAdapter);
-  }
-
-  async raw<R>(
-
-    /*
-      Notice/Warn/TODO:
-
-      El tipo Repository realmente no se deberia de
-      ocupar aca.. ya que este objeto pertenece
-      a typeorm y se supone que foundation debe
-      de ser agnostico al orm
-
-      sin embargo actualmente solo se esta trabajando
-      con typeorm, por eso funcionara asi por el momento
-    */
-    operation: (repo: Repository<E>) => Promise<R>
-  ): Promise<R> {
-    return this.connector.raw<E, R>(this.entity, operation);
+  /**
+   * Executor-bound raw query escape hatch — runs in the current transaction and returns
+   * rows (not a TypeORM Repository). Use for reads Criteria can't express, and keep it to
+   * your own module's schema (cross-module reads go through public contracts). See ADR-0002.
+   */
+  query<R = unknown>(sql: string, parameters?: readonly unknown[]): Promise<R[]> {
+    return this.connector.query<R>(sql, parameters);
   }
 }

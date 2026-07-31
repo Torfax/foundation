@@ -33,7 +33,8 @@ export type BuildUpdatePatchOptions<
 };
 
 export type WriteExecutionOptions = {
-  manager?: any;
+  // Reserved for future execution flags. The transactional manager is no longer threaded
+  // here — it is resolved ambiently via ExecutorContext / UnitOfWork (see ADR-0002).
 };
 
 export type DirectUpdateOptions<

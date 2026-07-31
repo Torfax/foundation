@@ -5,6 +5,13 @@ export * from "./BaseRespository";
 export * from "./EntityConstructor";
 export * from "./EntityStore";
 
+// Transactions & execution context (ADR-0002)
+export * from "./ExecutorContext";
+export * from "./UnitOfWork";
+export * from "./adapters/node/AsyncLocalStorageExecutorContext";
+export * from "./adapters/typeorm/TypeOrmUnitOfWork";
+export * from "./adapters/typeorm/createTypeOrmRuntime";
+
 // Connector & adapters
 export * from "./adapters/Connector";
 export * from "./adapters/typeorm/TypeOrmConnector";

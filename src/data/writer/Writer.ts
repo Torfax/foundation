@@ -71,9 +71,7 @@ export class Writer<Q, E extends object> {
       return filtered;
     }
 
-    const result = await this.writeRepository.updateById(id, filtered.updateData, {
-      manager: options.manager,
-    });
+    const result = await this.writeRepository.updateById(id, filtered.updateData);
 
     return {
       updateData: filtered.updateData,
@@ -96,9 +94,7 @@ export class Writer<Q, E extends object> {
     }
 
     const query = this.translator.translate(criteria);
-    const result = await this.writeRepository.updateByCriteria(query, filtered.updateData, {
-      manager: options.manager,
-    });
+    const result = await this.writeRepository.updateByCriteria(query, filtered.updateData);
 
     return {
       updateData: filtered.updateData,
@@ -121,9 +117,7 @@ export class Writer<Q, E extends object> {
     }
 
     const query = this.translator.translate(criteria);
-    const result = await this.writeRepository.updateMany(query, filtered.updateData, {
-      manager: options.manager,
-    });
+    const result = await this.writeRepository.updateMany(query, filtered.updateData);
 
     return {
       updateData: filtered.updateData,
@@ -154,9 +148,7 @@ export class Writer<Q, E extends object> {
       };
     }
 
-    const result = await this.writeRepository.updateById(id, consolidated.updateData, {
-      manager: options.manager,
-    });
+    const result = await this.writeRepository.updateById(id, consolidated.updateData);
 
     return {
       entityBefore,

@@ -6,6 +6,7 @@ import {
   Repository,
   UpdateResult,
 } from "typeorm";
+import { ExecutorContext } from "../../ExecutorContext";
 import { EntityConstructor } from "../../EntityConstructor";
 import { WriteDataSourcePort } from "../../writer/WriteDataSourcePort";
 import {
@@ -17,25 +18,23 @@ import {
 export class TypeOrmWriteAdapter<E extends ObjectLiteral>
   implements WriteDataSourcePort<FindManyOptions<E>, E> {
   constructor(
-    private readonly repository: Repository<E>,
+    private readonly executor: ExecutorContext<EntityManager>,
     private readonly entity: EntityConstructor<E>
   ) {}
 
-  async create(
-    data: Partial<E>,
-    options?: WriteExecutionOptions
-  ): Promise<E> {
-    const repository = this.getRepository(options?.manager);
+  private repository(): Repository<E> {
+    return this.executor.current().getRepository(this.entity as any);
+  }
+
+  async create(data: Partial<E>, _options?: WriteExecutionOptions): Promise<E> {
+    const repository = this.repository();
     const entity = repository.create(data as any);
     const saved = await repository.save(entity as any);
     return saved as unknown as E;
   }
 
-  async createMany(
-    data: Partial<E>[],
-    options?: WriteExecutionOptions
-  ): Promise<E[]> {
-    const repository = this.getRepository(options?.manager);
+  async createMany(data: Partial<E>[], _options?: WriteExecutionOptions): Promise<E[]> {
+    const repository = this.repository();
     const entities = repository.create(data as any[]);
     const saved = await repository.save(entities as any[]);
     return saved as unknown as E[];
@@ -44,74 +43,63 @@ export class TypeOrmWriteAdapter<E extends ObjectLiteral>
   async updateById(
     id: WriteEntityId,
     patch: Partial<E>,
-    options?: WriteExecutionOptions
+    _options?: WriteExecutionOptions
   ): Promise<WriteOperationResult> {
-    const result = await this.getRepository(options?.manager).update(id as any, patch);
+    const result = await this.repository().update(id as any, patch as any);
     return this.mapResult(result);
   }
 
   async updateByCriteria(
     query: FindManyOptions<E>,
     patch: Partial<E>,
-    options?: WriteExecutionOptions
+    _options?: WriteExecutionOptions
   ): Promise<WriteOperationResult> {
-    return this.executeWhereUpdate(query, patch, options);
+    return this.executeWhereUpdate(query, patch);
   }
 
   async updateMany(
     query: FindManyOptions<E>,
     patch: Partial<E>,
-    options?: WriteExecutionOptions
+    _options?: WriteExecutionOptions
   ): Promise<WriteOperationResult> {
-    return this.executeWhereUpdate(query, patch, options);
+    return this.executeWhereUpdate(query, patch);
   }
 
   async deleteById(
     id: WriteEntityId,
-    options?: WriteExecutionOptions
+    _options?: WriteExecutionOptions
   ): Promise<WriteOperationResult> {
-    const result = await this.getRepository(options?.manager).delete(id as any);
+    const result = await this.repository().delete(id as any);
     return this.mapDeleteResult(result);
   }
 
   async deleteByCriteria(
     query: FindManyOptions<E>,
-    options?: WriteExecutionOptions
+    _options?: WriteExecutionOptions
   ): Promise<WriteOperationResult> {
     if (!query.where) {
       throw new Error("Delete criteria must include a where clause.");
     }
-
-    const result = await this.getRepository(options?.manager).delete(query.where as any);
+    const result = await this.repository().delete(query.where as any);
     return this.mapDeleteResult(result);
-  }
-
-  private getRepository(manager?: EntityManager): Repository<E> {
-    return manager ? manager.getRepository(this.entity) : this.repository;
   }
 
   private async executeWhereUpdate(
     query: FindManyOptions<E>,
-    patch: Partial<E>,
-    options?: WriteExecutionOptions
+    patch: Partial<E>
   ): Promise<WriteOperationResult> {
     if (!query.where) {
       throw new Error("Update criteria must include a where clause.");
     }
-
-    const result = await this.getRepository(options?.manager).update(query.where as any, patch);
+    const result = await this.repository().update(query.where as any, patch as any);
     return this.mapResult(result);
   }
 
   private mapResult(result: UpdateResult): WriteOperationResult {
-    return {
-      affected: result.affected ?? undefined,
-    };
+    return { affected: result.affected ?? undefined };
   }
 
   private mapDeleteResult(result: DeleteResult): WriteOperationResult {
-    return {
-      affected: result.affected ?? undefined,
-    };
+    return { affected: result.affected ?? undefined };
   }
 }

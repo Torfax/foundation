@@ -1,6 +1,12 @@
 // @torfax/foundation — public API barrel.
 // Early development: this surface is not stable yet.
 
+// Core contracts (framework-agnostic primitives: UidGenerator, ...)
+export * from "./core";
+
+// Cryptography (by purpose: password hashing, ...)
+export * from "./crypto";
+
 // Configuration
 export * from "./config/ConfigService";
 
@@ -17,7 +23,7 @@ export * from "./files";
 export * from "./files/resolveStoreFileAccessUrl";
 
 // Persistence / data access (Criteria pattern + TypeORM adapter)
-export * from "./database";
+export * from "./data";
 
 // Utilities (namespaced: DateUtil, ObjectUtil, StringUtil, ZodUtils)
 export * from "./utils";
