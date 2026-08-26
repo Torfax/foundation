@@ -6,7 +6,12 @@
 export interface JwtSigner {
   sign(
     payload: Record<string, unknown>,
-    options: { expiresInSeconds: number; subject?: string }
+    options: {
+      expiresInSeconds: number;
+      subject?: string;
+      /** `aud`. An id_token names the client it was minted for; an access token usually does not. */
+      audience?: string;
+    }
   ): string;
 
   /** Returns the decoded claims, or throws if the token is invalid/expired. */

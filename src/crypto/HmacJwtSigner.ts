@@ -10,12 +10,13 @@ export class HmacJwtSigner implements JwtSigner {
 
   sign(
     payload: Record<string, unknown>,
-    options: { expiresInSeconds: number; subject?: string }
+    options: { expiresInSeconds: number; subject?: string; audience?: string }
   ): string {
     return jwtSign(payload, this.secret, {
       algorithm: "HS256",
       expiresIn: options.expiresInSeconds,
       ...(options.subject ? { subject: options.subject } : {}),
+      ...(options.audience ? { audience: options.audience } : {}),
       ...(this.issuer ? { issuer: this.issuer } : {}),
     });
   }

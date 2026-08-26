@@ -7,3 +7,4 @@ export * from "./SecretBox";
 export * from "./AesGcmSecretBox";
 export * from "./JwtSigner";
 export * from "./HmacJwtSigner";
+export * from "./RsaJwtSigner";
