@@ -15,3 +15,6 @@ coverage/
 Thumbs.db
 
 .idea/
+
+# Configuración local de Claude Code: de la máquina, no del proyecto.
+.claude/
