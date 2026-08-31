@@ -12,6 +12,9 @@ composes through **explicit dependency injection** (constructors + factories), s
 host (a plain Node script, Express, NestJS) can assemble it.
 
 > Torfax is its first consumer, but **Foundation does not depend on Torfax**.
+> El mapa de esos consumidores y del entorno local está en
+> [`torfax-platform/docs/ecosistema.md`](../torfax-platform/docs/ecosistema.md); el arranque
+> coordinado vive en [`torfax-dev`](../torfax-dev/README.md).
 
 ## Status
 
