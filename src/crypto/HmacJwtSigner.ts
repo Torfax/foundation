@@ -1,5 +1,6 @@
 import { sign as jwtSign, verify as jwtVerify } from "jsonwebtoken";
-import { JwtSigner } from "./JwtSigner";
+import { JwtSigner, JwtVerifyOptions } from "./JwtSigner";
+import { assertAudience } from "./audience";
 
 /** HS256 (symmetric-secret) JWT signer. Swap for an RS256/JWKS signer for federation later. */
 export class HmacJwtSigner implements JwtSigner {
@@ -10,7 +11,7 @@ export class HmacJwtSigner implements JwtSigner {
 
   sign(
     payload: Record<string, unknown>,
-    options: { expiresInSeconds: number; subject?: string; audience?: string }
+    options: { expiresInSeconds: number; subject?: string; audience?: string | string[] }
   ): string {
     return jwtSign(payload, this.secret, {
       algorithm: "HS256",
@@ -21,10 +22,15 @@ export class HmacJwtSigner implements JwtSigner {
     });
   }
 
-  verify<T extends object = Record<string, unknown>>(token: string): T {
-    return jwtVerify(token, this.secret, {
+  verify<T extends object = Record<string, unknown>>(
+    token: string,
+    options?: JwtVerifyOptions
+  ): T {
+    const claims = jwtVerify(token, this.secret, {
       algorithms: ["HS256"],
       ...(this.issuer ? { issuer: this.issuer } : {}),
     }) as T;
+    assertAudience(claims, options?.expectedAudience);
+    return claims;
   }
 }

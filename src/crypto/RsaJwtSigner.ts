@@ -1,6 +1,7 @@
 import { createPublicKey, createHash, KeyObject } from "node:crypto";
 import { sign as jwtSign, verify as jwtVerify } from "jsonwebtoken";
-import { JwtSigner } from "./JwtSigner";
+import { JwtSigner, JwtVerifyOptions } from "./JwtSigner";
+import { assertAudience } from "./audience";
 
 /** A public key in JWK form, as served by a JWKS document. */
 export interface JsonWebKey {
@@ -60,7 +61,7 @@ export class RsaJwtSigner implements PublishableJwtSigner {
 
   sign(
     payload: Record<string, unknown>,
-    options: { expiresInSeconds: number; subject?: string; audience?: string }
+    options: { expiresInSeconds: number; subject?: string; audience?: string | string[] }
   ): string {
     return jwtSign(payload, this.privateKeyPem, {
       algorithm: "RS256",
@@ -72,11 +73,16 @@ export class RsaJwtSigner implements PublishableJwtSigner {
     });
   }
 
-  verify<T extends object = Record<string, unknown>>(token: string): T {
-    return jwtVerify(token, this.publicKey, {
+  verify<T extends object = Record<string, unknown>>(
+    token: string,
+    options?: JwtVerifyOptions
+  ): T {
+    const claims = jwtVerify(token, this.publicKey, {
       algorithms: ["RS256"],
       ...(this.issuer ? { issuer: this.issuer } : {}),
     }) as T;
+    assertAudience(claims, options?.expectedAudience);
+    return claims;
   }
 
   activeKeyId(): string {
