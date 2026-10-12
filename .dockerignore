@@ -1,0 +1,15 @@
+# Foundation enters the Platform and Arcana images as a named build context: the
+# Dockerfiles copy package.json, package-lock.json, tsconfig.json and src/ and build
+# dist/ themselves. Nothing else needs to travel.
+node_modules
+dist
+coverage
+.git
+.claude
+.vscode
+.idea
+*.log
+*.tsbuildinfo
+.env
+.env.*
+!.env.example
