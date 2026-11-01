@@ -27,17 +27,36 @@ The package is marked `private` — it is consumed **locally** (see Install), no
 
 | Import from `@torfax/foundation` | What it gives you |
 |---|---|
-| **database** | ORM-agnostic data access as a *datasource connector*: `Criteria` reads + `Writer` (create/update/delete), TypeORM adapter. See [src/database/README.md](src/database/README.md) & [USAGE.md](src/database/USAGE.md). |
-| **config** | `ConfigService` — typed `process.env` reader with auto-casting. |
+| **data** | ORM-agnostic data access as a *datasource connector*: `Criteria` reads + `Writer` (create/update/delete), TypeORM adapter, `postgresDataSourceOptions` from `DB_*`. See [src/data/README.md](src/data/README.md) & [USAGE.md](src/data/USAGE.md). |
+| **config** | `ConfigService` — typed `process.env` reader with auto-casting; `buildVersion` / `versionedName` — which release is running. |
 | **exceptions** | Full HTTP exception hierarchy + an Express exception handler. |
-| **http** | `HttpResponse` envelope + `HttpUtil` request helpers (Express). |
+| **http** | The envelope (`successEnvelope`, `errorEnvelope`), `normalizeError`, `browserErrorPage`, `browserOrigins` (CORS), `isApiPath`, `parseTrustProxy`, request ids (`resolveRequestIds`, W3C `traceparent`), `HttpResponse` + `HttpUtil` (Express). |
 | **files** | `FilesModule` — uploads (Multer) + signed file-access URLs (JWT). |
 | **validators** | `class-validator` custom decorators (e.g. `@MatchClVal`). |
 | **utils** | `DateUtil`, `ObjectUtil`, `StringUtil`, `ZodUtils`. |
 
 Framework/heavy libs (`typeorm`, `express`, `class-validator`, `class-transformer`,
-`reflect-metadata`) are **optional peer dependencies**: the host provides its own copies,
-and you only need the ones for the parts you actually use.
+`reflect-metadata`, and Nest) are **optional peer dependencies**: the host provides its own
+copies, and you only need the ones for the parts you actually use.
+
+### `@torfax/foundation/nest`
+
+The same pieces wired into NestJS, for the services that are built on it — so they stop
+copying their `infra/`. The core never imports Nest; this part imports the core and Nest.
+
+| Export | What it gives you |
+|---|---|
+| `ConfigModule`, `APP_CONFIG` | `ConfigService` as a global provider |
+| `DatabaseModule.forRoot({ entities, dataSource })` | the DataSource from `DB_*`, the runtime, `CONNECTOR`, `UNIT_OF_WORK` |
+| `FoundationModule.forRoot({ secretBoxKey, passwordHasher, jwtSigner, providers })` | uids, hashed secrets, and only the signers and boxes the service asks for |
+| `RequestContextModule.forRoot(ContextClass)`, `RequestContextService<T>` | the request context in AsyncLocalStorage, opened by a middleware with the request's ids |
+| `applyHttpSetup(app, options)` | proxy trust, CORS, the static web, the envelope, the error filter |
+| `HealthModule.forRoot({ service, name, public })` | `GET /health` with the running release |
+
+A service linked with `file:` can end up with two copies of Nest, TypeORM and Express — its
+own and Foundation's. This part is written for that: errors are recognised by shape, never by
+`instanceof`; no Nest class is injected by type; rxjs is taken from the Observable that
+arrives; and the DataSource is built with the service's own class.
 
 ---
 

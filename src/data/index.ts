@@ -11,6 +11,7 @@ export * from "./UnitOfWork";
 export * from "./adapters/node/AsyncLocalStorageExecutorContext";
 export * from "./adapters/typeorm/TypeOrmUnitOfWork";
 export * from "./adapters/typeorm/createTypeOrmRuntime";
+export * from "./adapters/typeorm/postgresDataSourceOptions";
 
 // Connector & adapters
 export * from "./adapters/Connector";

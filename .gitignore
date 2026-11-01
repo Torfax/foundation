@@ -18,3 +18,4 @@ Thumbs.db
 
 # Configuración local de Claude Code: de la máquina, no del proyecto.
 .claude/
+build/

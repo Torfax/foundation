@@ -9,6 +9,7 @@ export * from "./crypto";
 
 // Configuration
 export * from "./config/ConfigService";
+export * from "./config/buildVersion";
 
 // Exceptions
 export * from "./exceptions/HttpException";
@@ -17,6 +18,11 @@ export * from "./exceptions/ExceptionHandler";
 // HTTP
 export * from "./http/HttpResponse";
 export * from "./http/HttpUtils";
+export * from "./http/envelope";
+export * from "./http/normalizeError";
+export * from "./http/browserErrorPage";
+export * from "./http/proxy";
+export * from "./http/requestIds";
 
 // Files
 export * from "./files";
