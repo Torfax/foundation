@@ -63,7 +63,7 @@ export class ResponseInterceptor<T> implements NestInterceptor<T, ApiEnvelope<T>
 }
 
 export interface HttpExceptionFilterOptions {
-  /** The service's name, on the page a browser gets («Arcana», «Desktop»). */
+  /** The service's name, on the page a browser gets («Arcana», «Taller»). */
   service?: string;
   /** What the service is, said to a person who reached an address with no page. */
   notFoundLead?: string;

@@ -13,7 +13,7 @@
 export function browserErrorPage(input: {
   statusCode: number;
   message: string;
-  /** The service's name, shown under the message («Arcana», «Desktop»). */
+  /** The service's name, shown under the message («Arcana», «Taller»). */
   service: string;
   /** What this service is, said to a person who reached an address with no page. */
   notFoundLead?: string;
