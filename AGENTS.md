@@ -8,4 +8,4 @@ Foundation no contiene dominio Torfax. Su núcleo (`src/`, salvo `src/nest/`) no
 ni de ningún framework; `src/nest/` (`@torfax/foundation/nest`) lo conecta a Nest, depende del
 núcleo y tiene a Nest como dependencia opcional. Si algo nombra un token de Torfax, una
 instalación o una acción, no va acá: va en el SDK (`torfax-node`). Después de modificarla, correr `npm test`
-y construirla antes de validar Platform, Arcana o Desktop, que la consumen mediante `file:`.
+y construirla antes de validar Platform, Arcana o el Taller, que la consumen mediante `file:`.
